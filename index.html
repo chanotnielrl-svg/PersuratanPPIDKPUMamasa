@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PERSURATAN PPID KPU MAMASA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* PENGATURAN CETAK / PDF PRESISI (MENGHILANGKAN HEADER & FOOTER BROWSER) */
+    @media print {
+      @page {
+        size: auto;
+        margin: 0mm !important;
+      }
+      html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      main {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+      }
+      .print-container {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 14mm 16mm !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      /* Ukuran khusus untuk cetak Buku Register Landscape F4 */
+      .print-landscape {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 5mm 6mm !important;
+        font-size: 7pt !important;
+        overflow: visible !important;
+        box-sizing: border-box !important;
+      }
+      .print-landscape .kop-register {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 8px !important;
+        padding-bottom: 6px !important;
+      }
+      .print-landscape table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        font-size: 6.2pt !important;
+        line-height: 1.2 !important;
+      }
+      .print-landscape th,
+      .print-landscape td {
+        padding: 3px 2px !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+      }
+      .print-landscape td.whitespace-nowrap {
+        white-space: normal !important;
+      }
+      .print-landscape .ttd-register {
+        display: flex !important;
+        justify-content: flex-end !important;
+        margin-top: 14px !important;
+        padding-right: 12mm !important;
+        font-size: 7.5pt !important;
+      }
+    }
+
+    /* Garis titik-titik khas formulir resmi KPU */
+    .dotted-line {
+      border-bottom: 1.5px dotted #1e293b;
+      display: inline-block;
+      min-height: 1.35rem;
+      padding: 0 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-container" class="no-print fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+  <!-- NAVBAR UTAMA -->
+  <header class="no-print bg-gradient-to-r from-red-900 via-red-800 to-slate-900 text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        <!-- Brand / Logo -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+          <div class="bg-white p-1.5 rounded-xl shadow-md flex-shrink-0">
+            <img src="1627539868logo-kpu.png"
+                 alt="Logo KPU" class="w-9 h-9 sm:w-10 sm:h-10 object-contain" />
+          </div>
+          <div>
+            <h1 class="text-base sm:text-xl font-extrabold tracking-tight leading-tight">PERSURATAN PPID</h1>
+            <p class="text-xs text-red-200 font-medium">KPU KABUPATEN MAMASA</p>
+          </div>
+        </div>
+
+        <!-- Status Koneksi & Login Admin -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div id="db-status-badge" class="hidden md:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-white/10 border border-white/20">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="db-dot"></span>
+            <span id="db-status-text">Mode Lokal (Siap Sinkron)</span>
+          </div>
+
+          <button id="btn-admin-toggle" onclick="openLoginModal()" class="flex items-center gap-2 bg-white text-red-900 hover:bg-red-50 font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow transition">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span id="admin-btn-label">Login Admin</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MENU NAVIGASI -->
+      <nav class="flex overflow-x-auto gap-1 pb-2 pt-1 text-xs sm:text-sm font-medium no-scrollbar">
+        <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn px-3.5 py-2 rounded-lg bg-white/20 text-white whitespace-nowrap flex items-center gap-1.5 transition">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+        </button>
+        <button onclick="switchTab('form-permohonan')" data-tab="form-permohonan" class="nav-btn px-3.5 py-2 rounded-lg text-red-100 hover:bg-white/10 whitespace-nowrap flex items-center gap-1.5 transition">
+          <i data-lucide="file-plus-2" class="w-4 h-4"></i> 1. Permohonan & Tanda Terima
+        </button>
+        <button onclick="switchTab('form-keberatan')" data-tab="form-keberatan" class="nav-btn px-3.5 py-2 rounded-lg text-red-100 hover:bg-white/10 whitespace-nowrap flex items-center gap-1.5 transition">
+          <i data-lucide="file-warning" class="w-4 h-4"></i> 2. Formulir Keberatan
+        </button>
+        <button onclick="switchTab('buku-register')" data-tab="buku-register" class="nav-btn px-3.5 py-2 rounded-lg text-red-100 hover:bg-white/10 whitespace-nowrap flex items-center gap-1.5 transition">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i> 3. Buku Register Informasi
+        </button>
+        <button onclick="switchTab('admin-panel')" data-tab="admin-panel" id="nav-admin-settings" class="hidden nav-btn px-3.5 py-2 rounded-lg text-amber-200 hover:bg-white/10 whitespace-nowrap flex items-center gap-1.5 transition">
+          <i data-lucide="settings" class="w-4 h-4"></i> Pengaturan & Database
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- KONTEN UTAMA -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- =====================================================================
+         TAB 0: DASHBOARD RINGKASAN
+    ====================================================================== -->
+    <section id="tab-dashboard" class="tab-section space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 mb-2">
+            PKPU 22/2023 • Layanan Informasi Publik
+          </span>
+          <h2 class="text-2xl font-bold text-slate-900">Selamat Datang di E-Persuratan PPID</h2>
+          <p class="text-slate-600 text-sm mt-1">Komisi Pemilihan Umum Kabupaten Mamasa — Terintegrasi Otomatis dengan Buku Register & Cetak Dokumen Resmi.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="resetFormPermohonan(); switchTab('form-permohonan')" class="bg-red-800 hover:bg-red-900 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow flex items-center gap-2 transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Buat Permohonan Baru
+          </button>
+          <button onclick="resetFormKeberatan(); switchTab('form-keberatan')" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow flex items-center gap-2 transition">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i> Ajukan Keberatan
+          </button>
+        </div>
+      </div>
+
+      <!-- Statistik -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase text-slate-500">Total Permohonan</span>
+            <div class="p-2 bg-red-50 text-red-700 rounded-lg"><i data-lucide="files" class="w-5 h-5"></i></div>
+          </div>
+          <p id="stat-total-permohonan" class="text-3xl font-extrabold text-slate-900 mt-2">0</p>
+          <p class="text-xs text-slate-500 mt-1">Tercatat di Buku Register</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase text-slate-500">No. Register Berikutnya</span>
+            <div class="p-2 bg-emerald-50 text-emerald-700 rounded-lg"><i data-lucide="hash" class="w-5 h-5"></i></div>
+          </div>
+          <p id="stat-next-reg" class="text-lg font-extrabold text-emerald-700 mt-3 truncate">001/PPID-KPU.MMS/2026</p>
+          <p class="text-xs text-slate-500 mt-1">Penomoran urut otomatis</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase text-slate-500">Pengajuan Keberatan</span>
+            <div class="p-2 bg-amber-50 text-amber-700 rounded-lg"><i data-lucide="scale" class="w-5 h-5"></i></div>
+          </div>
+          <p id="stat-total-keberatan" class="text-3xl font-extrabold text-slate-900 mt-2">0</p>
+          <p class="text-xs text-slate-500 mt-1">Register Keberatan Layanan</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase text-slate-500">Status Hak Akses</span>
+            <div class="p-2 bg-blue-50 text-blue-700 rounded-lg"><i data-lucide="user-cog" class="w-5 h-5"></i></div>
+          </div>
+          <p id="stat-role" class="text-xl font-extrabold text-slate-900 mt-2">Petugas / Pemohon</p>
+          <p class="text-xs text-slate-500 mt-1">Login Admin untuk edit penuh</p>
+        </div>
+      </div>
+
+      <!-- Tabel Aktivitas Terbaru -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <h3 class="font-bold text-slate-800">Riwayat Permohonan & Tanda Terima Terbaru</h3>
+          <button onclick="switchTab('buku-register')" class="text-xs font-semibold text-red-700 hover:underline">Lihat Buku Register Lengkap &rarr;</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-slate-600 text-xs uppercase">
+              <tr>
+                <th class="px-6 py-3">No. Register</th>
+                <th class="px-6 py-3">Tanggal</th>
+                <th class="px-6 py-3">Pemohon</th>
+                <th class="px-6 py-3">Informasi Diminta</th>
+                <th class="px-6 py-3 text-right">Cetak Dokumen</th>
+              </tr>
+            </thead>
+            <tbody id="recent-table-body" class="divide-y divide-slate-100">
+              <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Belum ada data permohonan.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         TAB 1: FORMULIR PERMOHONAN & TANDA TERIMA (1 KESATUAN TERHUBUNG)
+    ====================================================================== -->
+    <section id="tab-form-permohonan" class="tab-section hidden space-y-6">
+      <div class="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">1. Formulir Permohonan & Tanda Terima Informasi Publik</h2>
+          <p class="text-xs text-slate-500">Mengisi formulir ini otomatis membuat Tanda Terima & mencatat ke Buku Register.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="resetFormPermohonan()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Form Baru
+          </button>
+          <button type="button" onclick="printDocument('permohonan-combined')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold flex items-center gap-1.5 shadow">
+            <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Simpan PDF (Form + Tanda Terima)
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- KOLOM INPUT FORMULIR (KIRI) -->
+        <form id="form-permohonan" onsubmit="handleSavePermohonan(event)" class="no-print lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 h-fit">
+          <input type="hidden" id="prm-id" />
+
+          <div class="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center justify-between">
+            <div>
+              <label class="block text-[11px] font-bold uppercase text-red-800">No. Pendaftaran / Register Otomatis</label>
+              <input type="text" id="prm-noreg" readonly class="bg-transparent font-extrabold text-red-950 text-sm w-full focus:outline-none" />
+            </div>
+            <span id="badge-edit-reg-prm" class="hidden text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded font-bold">Mode Edit Admin</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Permohonan *</label>
+              <input type="date" id="prm-tgl" required oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Telepon / E-mail *</label>
+              <input type="text" id="prm-kontak" required placeholder="0812xxxx / email@domain.com" oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Pemohon (Perorangan / Instansi) *</label>
+            <input type="text" id="prm-nama" required placeholder="Masukkan nama lengkap pemohon" oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">NIK / No. Akta Pendirian *</label>
+            <input type="text" id="prm-nik" required placeholder="Masukkan 16 digit NIK atau No. Akta Pendirian" oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Lengkap *</label>
+            <textarea id="prm-alamat" rows="2" required placeholder="Jalan, Desa/Kelurahan, Kecamatan, Kabupaten" oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Pekerjaan *</label>
+            <input type="text" id="prm-pekerjaan" required placeholder="Contoh: Wiraswasta / Mahasiswa / Jurnalis / LSM" oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Rincian Informasi yang Dibutuhkan *</label>
+            <textarea id="prm-rincian" rows="3" required placeholder="Tuliskan detail informasi publik yang diminta..." oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Informasi Publik **</label>
+            <select id="prm-kategori" onchange="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none">
+              <option value="1">1. Informasi Tahapan Pemilu</option>
+              <option value="2">2. Informasi KPU sebagai Badan Publik</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tujuan Penggunaan Informasi *</label>
+            <textarea id="prm-tujuan" rows="2" required placeholder="Contoh: Penelitian Akademik / Monitoring Pemilu / Referensi" oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-red-700 focus:outline-none"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Cara Memperoleh Informasi</label>
+              <select id="prm-cara-peroleh" onchange="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <option value="1">1. Melihat/membaca/mendengarkan/mencatat</option>
+                <option value="2-softcopy" selected>2. Mendapatkan Salinan (Softcopy)</option>
+                <option value="2-hardcopy">2. Mendapatkan Salinan (Hardcopy)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Cara Mendapatkan Salinan **</label>
+              <select id="prm-cara-salinan" onchange="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                <option value="1">1. Mengambil langsung</option>
+                <option value="2">2. Faksimili</option>
+                <option value="3" selected>3. E-mail</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Petugas Pelayanan Informasi (Penerima)</label>
+            <input type="text" id="prm-petugas" oninput="syncPreviewPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+
+          <button type="submit" class="w-full bg-red-800 hover:bg-red-900 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition">
+            <i data-lucide="save" class="w-5 h-5"></i> Simpan & Catat Otomatis ke Register
+          </button>
+        </form>
+
+        <!-- KOLOM PRATINJAU DOKUMEN RESMI (KANAN - SIAP PRINT PDF) -->
+        <div id="print-area-permohonan" class="lg:col-span-7 space-y-8">
+          
+          <!-- HALAMAN 1: FORMULIR PERMOHONAN INFORMASI PUBLIK (SESUAI GAMBAR 3) -->
+          <div class="print-container bg-white p-8 sm:p-10 rounded-2xl border border-slate-300 shadow-sm font-doc text-black text-[11.5pt] leading-snug">
+            <div class="text-center mb-3">
+              <img src="1627539868logo-kpu.png"
+                   alt="Logo KPU" class="w-16 h-16 mx-auto mb-2 object-contain" />
+              <div class="font-bold text-[12pt] tracking-wide">FORMULIR PERMOHONAN INFORMASI PUBLIK</div>
+              <div class="font-bold text-[12pt] tracking-wide">KPU KABUPATEN MAMASA</div>
+              <hr class="border-t-2 border-black mt-2 mb-3" />
+              <div class="font-bold text-[11.5pt]">FORMULIR PERMOHONAN INFORMASI</div>
+              <div class="text-[11pt]">
+                <span class="font-bold">No. Pendaftaran</span> <span class="italic text-[10pt]">(diisi petugas)*</span> : 
+                <span id="prev-prm-noreg" class="font-bold dotted-line min-w-[180px]">001/PPID-KPU.MMS/2026</span>
+              </div>
+            </div>
+
+            <table class="w-full border-collapse text-[11pt] mt-4">
+              <tr>
+                <td class="w-[36%] py-1.5 align-top font-bold">Nama</td>
+                <td class="w-[3%] py-1.5 align-top">:</td>
+                <td class="w-[61%] py-1.5 align-top"><div id="prev-prm-nama" class="dotted-line w-full font-semibold"></div></td>
+              </tr>
+              <tr>
+                <td class="py-1.5 align-top font-bold">NIK / No. Akta Pendirian</td>
+                <td class="py-1.5 align-top">:</td>
+                <td class="py-1.5 align-top"><div id="prev-prm-nik" class="dotted-line w-full font-semibold"></div></td>
+              </tr>
+              <tr>
+                <td class="py-1.5 align-top font-bold">Alamat</td>
+                <td class="py-1.5 align-top">:</td>
+                <td class="py-1.5 align-top"><div id="prev-prm-alamat" class="dotted-line w-full min-h-[2.6rem]"></div></td>
+              </tr>
+              <tr>
+                <td class="py-1.5 align-top font-bold">Pekerjaan</td>
+                <td class="py-1.5 align-top">:</td>
+                <td class="py-1.5 align-top"><div id="prev-prm-pekerjaan" class="dotted-line w-full"></div></td>
+              </tr>
+              <tr>
+                <td class="py-1.5 align-top font-bold">Nomor Telepon/E-mail</td>
+                <td class="py-1.5 align-top">:</td>
+                <td class="py-1.5 align-top"><div id="prev-prm-kontak" class="dotted-line w-full"></div></td>
+              </tr>
+              <tr>
+                <td class="py-1.5 align-top font-bold">
+                  Rincian Informasi yang dibutuhkan :<br/>
+                  <span class="font-normal text-[10pt] mt-2 inline-block">(tambahkan kertas bila perlu)</span>
+                </td>
+                <td class="py-1.5 align-top">:</td>
+                <td class="py-1.5 align-top"><div id="prev-prm-rincian" class="dotted-line w-full min-h-[4.2rem]"></div></td>
+              </tr>
+              <tr>
+                <td class="py-2 align-top font-bold">Kategori Informasi Publik**</td>
+                <td class="py-2 align-top">:</td>
+                <td class="py-2 align-top">
+                  <div>1. Informasi Tahapan Pemilu <span id="check-kat-1" class="font-bold text-red-800 ml-2">[ ✓ ]</span></div>
+                  <div>2. Informasi KPU sebagai Badan Publik <span id="check-kat-2" class="font-bold text-red-800 ml-2 hidden">[ ✓ ]</span></div>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-1.5 align-top font-bold">Tujuan Penggunaan Informasi</td>
+                <td class="py-1.5 align-top">:</td>
+                <td class="py-1.5 align-top"><div id="prev-prm-tujuan" class="dotted-line w-full min-h-[3.2rem]"></div></td>
+              </tr>
+              <tr>
+                <td class="py-2 align-top font-bold">Cara Memperoleh Informasi</td>
+                <td class="py-2 align-top">:</td>
+                <td class="py-2 align-top">
+                  <div id="opt-peroleh-1">1. Melihat/membaca/mendengarkan/mencatat***</div>
+                  <div id="opt-peroleh-2">2. Mendapatkan Salinan informasi (<span id="span-hardcopy">hardcopy</span>/<span id="span-softcopy">softcopy</span>)***</div>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-2 align-top font-bold">Cara Mendapatkan Salinan Informasi**</td>
+                <td class="py-2 align-top">:</td>
+                <td class="py-2 align-top">
+                  <div>1. Mengambil langsung <span id="check-sal-1" class="font-bold text-red-800 ml-2 hidden">[ ✓ ]</span></div>
+                  <div>2. Faksimili <span id="check-sal-2" class="font-bold text-red-800 ml-2 hidden">[ ✓ ]</span></div>
+                  <div>3. <span class="italic">E-mail</span> <span id="check-sal-3" class="font-bold text-red-800 ml-2">[ ✓ ]</span></div>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Tanda Tangan Form Permohonan -->
+            <div class="mt-6 text-right pr-4">
+              Mamasa, <span id="prev-prm-tgl" class="dotted-line min-w-[160px] text-center"></span>
+            </div>
+            <div class="grid grid-cols-2 text-center mt-2">
+              <div>
+                <div class="font-bold">Pemohon Informasi</div>
+                <div class="h-16"></div>
+                <div class="font-bold">(<span id="prev-prm-ttd-pemohon" class="dotted-line min-w-[170px]"></span>)</div>
+              </div>
+              <div>
+                <div class="font-bold">Petugas Pelayanan Informasi<br/>(Penerima Permohonan)</div>
+                <div class="h-12"></div>
+                <div class="font-bold">(<span id="prev-prm-ttd-petugas" class="dotted-line min-w-[170px]"></span>)</div>
+              </div>
+            </div>
+
+            <!-- Keterangan Kaki -->
+            <div class="mt-6 text-[9.5pt] text-slate-700 leading-tight">
+              <div>Keterangan:</div>
+              <div>* &nbsp;&nbsp;&nbsp;Diisi oleh petugas berdasarkan nomor registrasi permohonan Informasi Publik</div>
+              <div>** &nbsp;&nbsp;pilih salah satu dengan memberi tanda (v)</div>
+              <div>*** coret yang tidak perlu</div>
+            </div>
+          </div>
+
+          <!-- HALAMAN 2: TANDA TERIMA PERMOHONAN INFORMASI PUBLIK (OTOMATIS TERHUBUNG - SESUAI GAMBAR 2) -->
+          <div class="print-container page-break bg-white p-8 sm:p-12 rounded-2xl border border-slate-300 shadow-sm font-doc text-black text-[12pt] leading-relaxed">
+            <div class="text-center mb-4">
+              <img src="1627539868logo-kpu.png"
+                   alt="Logo KPU" class="w-16 h-16 mx-auto mb-2 object-contain" />
+              <div class="font-bold text-[12pt]">FORMULIR PERMOHONAN INFORMASI PUBLIK</div>
+              <div class="font-bold text-[12pt]">KPU KABUPATEN MAMASA</div>
+              <hr class="border-t-2 border-black mt-2 mb-6" />
+              <div class="font-bold text-[12pt]">TANDA TERIMA</div>
+              <div class="font-bold text-[12pt] mt-1">PERMOHONAN INFORMASI PUBLIK</div>
+            </div>
+
+            <table class="w-full max-w-xl mx-auto mt-10 text-[11.5pt]">
+              <tr>
+                <td class="w-[45%] py-2.5 font-bold">Nama Permohonan Informasi</td>
+                <td class="w-[5%] py-2.5 font-bold">:</td>
+                <td class="w-[50%] py-2.5"><span id="tt-nama" class="dotted-line w-full font-bold"></span></td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-bold">Nomor Pendaftaran</td>
+                <td class="py-2.5 font-bold">:</td>
+                <td class="py-2.5"><span id="tt-noreg" class="dotted-line w-full font-bold"></span></td>
+              </tr>
+              <tr>
+                <td class="py-2.5 font-bold">Tanggal Permohonan</td>
+                <td class="py-2.5 font-bold">:</td>
+                <td class="py-2.5"><span id="tt-tgl" class="dotted-line w-full"></span></td>
+              </tr>
+            </table>
+
+            <div class="max-w-xl mx-auto mt-16">
+              <div class="text-right pr-6 mb-2">
+                <span class="font-bold">Mamasa,</span> <span id="tt-tgl-kanan" class="dotted-line min-w-[150px] text-center"></span>
+              </div>
+              <div class="grid grid-cols-2 text-center">
+                <div>
+                  <div class="font-bold">Pemohon Informasi</div>
+                  <div class="h-20"></div>
+                  <div id="tt-sign-pemohon" class="dotted-line min-w-[160px] font-bold"></div>
+                </div>
+                <div>
+                  <div class="font-bold">Desk Layanan Informasi</div>
+                  <div class="h-20"></div>
+                  <div id="tt-sign-petugas" class="dotted-line min-w-[160px] font-bold"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         TAB 2: FORMULIR KEBERATAN ATAS PELAYANAN INFORMASI (SESUAI GAMBAR 4)
+    ====================================================================== -->
+    <section id="tab-form-keberatan" class="tab-section hidden space-y-6">
+      <div class="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">2. Formulir Keberatan Atas Pelayanan Informasi Publik</h2>
+          <p class="text-xs text-slate-500">Dapat menarik data otomatis dari Nomor Permohonan Informasi yang sudah terdaftar.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="resetFormKeberatan()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Form Baru
+          </button>
+          <button type="button" onclick="printDocument('keberatan')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold flex items-center gap-1.5 shadow">
+            <i data-lucide="printer" class="w-4 h-4"></i> Cetak / Simpan PDF Keberatan
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- INPUT KEBERATAN (KIRI) -->
+        <form id="form-keberatan" onsubmit="handleSaveKeberatan(event)" class="no-print lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 h-fit">
+          <input type="hidden" id="keb-id" />
+
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <label class="block text-[11px] font-bold uppercase text-amber-900">Nomor Register Keberatan Otomatis</label>
+            <input type="text" id="keb-noreg" readonly class="bg-transparent font-extrabold text-amber-950 text-sm w-full focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tarik Data dari Permohonan Informasi (Opsional)</label>
+            <select id="keb-ref-select" onchange="autofillKeberatanFromPermohonan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-slate-50">
+              <option value="">-- Pilih Nomor Register Permohonan --</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Surat *</label>
+              <input type="text" id="keb-nosurat" required oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Permohonan Informasi *</label>
+              <input type="text" id="keb-nopermohonan" required oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tujuan Penggunaan Informasi *</label>
+            <textarea id="keb-tujuan" rows="2" required oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Pemohon *</label>
+              <input type="text" id="keb-nama" required oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Instansi / Lembaga</label>
+              <input type="text" id="keb-instansi" placeholder="Perorangan / Nama Lembaga" oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Pemohon *</label>
+            <textarea id="keb-alamat" rows="2" required oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">b. Alasan Keberatan *</label>
+            <select id="keb-alasan-preset" onchange="document.getElementById('keb-alasan').value = this.value; syncPreviewKeberatan();" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs mb-1.5 bg-slate-50">
+              <option value="">-- Pilih Alasan Standar UU KIP atau ketik manual di bawah --</option>
+              <option value="Penolakan atas permohonan informasi publik berdasarkan alasan pengecualian">1. Penolakan atas permohonan informasi publik</option>
+              <option value="Tidak disediakannya informasi berkala">2. Tidak disediakannya informasi berkala</option>
+              <option value="Tidak ditanggapinya permohonan informasi publik">3. Tidak ditanggapinya permohonan informasi publik</option>
+              <option value="Permohonan informasi publik ditanggapi tidak sebagaimana yang diminta">4. Permohonan ditanggapi tidak sebagaimana yang diminta</option>
+              <option value="Tidak dipenuhinya permohonan informasi publik">5. Tidak dipenuhinya permohonan informasi publik</option>
+              <option value="Pengenaan biaya yang tidak wajar">6. Pengenaan biaya yang tidak wajar</option>
+              <option value="Penyampaian informasi publik yang melebihi waktu yang diatur dalam UU KIP">7. Penyampaian informasi melebihi jangka waktu</option>
+            </select>
+            <textarea id="keb-alasan" rows="2" required placeholder="Uraikan alasan keberatan..." oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">c. Kasus Posisi *</label>
+            <textarea id="keb-kasus" rows="3" required placeholder="Jelaskan kronologi / kasus posisi keberatan..." oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Pengajuan *</label>
+              <input type="date" id="keb-tgl-pengajuan" required oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Hari/Tgl Tanggapan Diberikan (Maks 30 Hari Kerja)</label>
+              <input type="text" id="keb-tgl-tanggapan" placeholder="Contoh: Senin, 21 Desember 2026" oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Petugas Pelayanan Informasi</label>
+            <input type="text" id="keb-petugas" oninput="syncPreviewKeberatan()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+
+          <button type="submit" class="w-full bg-red-800 hover:bg-red-900 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition">
+            <i data-lucide="save" class="w-5 h-5"></i> Simpan Formulir Keberatan
+          </button>
+        </form>
+
+        <!-- PRATINJAU FORMULIR KEBERATAN (KANAN - SESUAI GAMBAR 4) -->
+        <div id="print-area-keberatan" class="lg:col-span-7">
+          <div class="print-container bg-white p-8 sm:p-10 rounded-2xl border border-slate-300 shadow-sm font-doc text-black text-[11pt] leading-snug">
+            <!-- KOP SURAT RESMI -->
+            <div class="flex items-center gap-4 border-b-4 border-double border-black pb-3 mb-4">
+              <img src="1627539868logo-kpu.png"
+                   alt="Logo KPU" class="w-16 h-16 object-contain flex-shrink-0" />
+              <div class="text-center flex-1">
+                <div class="font-bold text-[13pt] leading-tight">PPID KOMISI PEMILIHAN UMUM</div>
+                <div class="font-bold text-[13pt] leading-tight">KABUPATEN MAMASA</div>
+                <div class="italic text-[9.5pt] mt-0.5">Alamat : Rantebuda, Desa Rambusaratu, Kec. Mamasa, Kab. Mamasa</div>
+                <div class="italic text-[9.5pt]">Email : ppidkpukabmamasa@gmail.com</div>
+              </div>
+            </div>
+
+            <div class="text-right mb-2 text-[10.5pt]">
+              NOMOR* : <span id="prev-keb-nosurat" class="dotted-line min-w-[180px] text-left font-bold"></span>
+            </div>
+
+            <div class="text-center font-bold text-[11.5pt] mb-4">
+              FORMULIR KEBERATAN ATAS PELAYANAN INFORMASI *
+            </div>
+
+            <!-- Bagian a -->
+            <div class="font-bold mb-1">a. &nbsp;INFORMASI PENGAJUAN KEBERATAN</div>
+            <table class="w-full pl-5 text-[10.5pt] mb-3">
+              <tr>
+                <td class="w-[38%] pl-5 py-1">Nomor Registrasi Keberatan</td>
+                <td class="w-[3%] py-1">:</td>
+                <td class="w-[59%] py-1"><span id="prev-keb-noreg" class="dotted-line min-w-[160px] font-bold"></span> <span class="italic text-[9.5pt]">(diisi petugas**)</span></td>
+              </tr>
+              <tr>
+                <td class="pl-5 py-1">Nomor Permohonan Informasi</td>
+                <td class="py-1">:</td>
+                <td class="py-1"><span id="prev-keb-nopermohonan" class="dotted-line w-full font-bold"></span></td>
+              </tr>
+              <tr>
+                <td class="pl-5 py-1 align-top">Tujuan Penggunaan Informasi</td>
+                <td class="py-1 align-top">:</td>
+                <td class="py-1 align-top"><div id="prev-keb-tujuan" class="dotted-line w-full min-h-[2.4rem]"></div></td>
+              </tr>
+              <tr>
+                <td class="pl-5 py-1 font-semibold">Identitas Pemohon</td>
+                <td class="py-1">:</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="pl-10 py-1">Nama</td>
+                <td class="py-1">:</td>
+                <td class="py-1"><span id="prev-keb-nama" class="dotted-line w-full font-bold"></span></td>
+              </tr>
+              <tr>
+                <td class="pl-10 py-1">Instansi/ Lembaga</td>
+                <td class="py-1">:</td>
+                <td class="py-1"><span id="prev-keb-instansi" class="dotted-line w-full"></span></td>
+              </tr>
+              <tr>
+                <td class="pl-10 py-1 align-top">Alamat</td>
+                <td class="py-1 align-top">:</td>
+                <td class="py-1 align-top"><div id="prev-keb-alamat" class="dotted-line w-full min-h-[2.4rem]"></div></td>
+              </tr>
+            </table>
+
+            <!-- Bagian b -->
+            <div class="font-bold mb-1">b. &nbsp;ALASAN KEBERATAN</div>
+            <div class="pl-5 mb-3">
+              <div id="prev-keb-alasan" class="dotted-line w-full min-h-[3.6rem]"></div>
+            </div>
+
+            <!-- Bagian C -->
+            <div class="font-bold mb-1">C. &nbsp;KASUS POSISI <span class="font-normal">( tambahkan kertas bila diperlukan)</span></div>
+            <div class="pl-5 mb-3">
+              <div id="prev-keb-kasus" class="dotted-line w-full min-h-[3.6rem]"></div>
+            </div>
+
+            <!-- Bagian D -->
+            <div class="font-bold mb-3">
+              D. &nbsp;HARI/TANGGAL/TANGGAPAN ATAS KEBERATAN AKAN DIBERIKAN 
+              <span id="prev-keb-tanggapan" class="dotted-line min-w-[200px] font-normal"></span> 
+              <span class="italic font-normal text-[9.5pt]">(diisi petugas***)</span>.
+            </div>
+
+            <p class="indent-8 mb-4 text-[10.5pt]">
+              Demikian keberatan ini saya sampaikan, atas perhatian dan tanggapannya diucapkan terima kasih.
+            </p>
+
+            <div class="text-right pr-6 mb-1">
+              Mamasa, <span id="prev-keb-tgl" class="dotted-line min-w-[140px] text-center"></span>
+            </div>
+            <div class="grid grid-cols-2 text-center mb-5">
+              <div>
+                <div>Petugas Pelayanan Informasi</div>
+                <div class="h-14"></div>
+                <div>(<span id="prev-keb-ttd-petugas" class="dotted-line min-w-[160px]"></span>)</div>
+              </div>
+              <div>
+                <div>Pemohon Informasi</div>
+                <div class="h-14"></div>
+                <div>(<span id="prev-keb-ttd-pemohon" class="dotted-line min-w-[160px]"></span>)</div>
+              </div>
+            </div>
+
+            <div class="text-[9pt] text-slate-700 leading-tight">
+              <div>Keterangan :</div>
+              <div>* &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dibuat rangkap dua, lembar satu untuk pemohon, lembar dua untuk petugas</div>
+              <div>** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Diisi berdasarkan nomor registrasi pengajuan keberatan sesuai dengan buku register pengajuan keberatan</div>
+              <div>*** &nbsp;&nbsp;&nbsp;&nbsp;Diisi sesuai dengan ketentuan jangka waktu paling lama 30 hari kerja</div>
+              <div>**** &nbsp;&nbsp;&nbsp;Diisi dengan tanggal diterimanya pengajuan keberatan yaitu sejak keberatan dinyatakan lengkap sesuai dengan buku register pengajuan keberatan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAFTAR KEBERATAN TERCATAT -->
+      <div class="no-print bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <h3 class="font-bold text-slate-800">Daftar Pengajuan Keberatan Tercatat</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
+              <tr>
+                <th class="px-4 py-3">No. Reg Keberatan</th>
+                <th class="px-4 py-3">Ref. Permohonan</th>
+                <th class="px-4 py-3">Pemohon</th>
+                <th class="px-4 py-3">Alasan Keberatan</th>
+                <th class="px-4 py-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="keberatan-table-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         TAB 3: BUKU / DAFTAR REGISTRASI PERMINTAAN INFORMASI (SESUAI GAMBAR 1)
+    ====================================================================== -->
+    <section id="tab-buku-register" class="tab-section hidden space-y-5">
+      <div class="no-print flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">3. Buku Register Permintaan Informasi Publik</h2>
+          <p class="text-xs text-slate-500">Berdasarkan PKPU 22/2023 • Terisi otomatis dari setiap permohonan yang masuk.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5">
+            <i data-lucide="calendar" class="w-4 h-4 text-red-800"></i>
+            <label for="filter-tahun-register" class="text-xs font-semibold text-slate-600">Tahun:</label>
+            <select id="filter-tahun-register" onchange="renderBukuRegister()" class="bg-transparent text-xs sm:text-sm font-bold text-slate-900 focus:outline-none cursor-pointer">
+              <option value="2026">2026</option>
+            </select>
+          </div>
+          <input type="text" id="search-register" oninput="renderBukuRegister()" placeholder="Cari nama / no register / informasi..." class="rounded-xl border border-slate-300 px-3.5 py-2 text-xs sm:text-sm w-60 focus:ring-2 focus:ring-red-700 focus:outline-none" />
+          <button onclick="printRegisterLandscape()" class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i> Cetak Laporan PDF (Landscape)
+          </button>
+        </div>
+      </div>
+
+      <!-- AREA CETAK BUKU REGISTER (PERSIS STRUKTUR HEADER GAMBAR 1) -->
+      <div id="print-area-register" class="print-container print-landscape bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+        <!-- Kop Buku Register -->
+        <div class="kop-register flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-300">
+          <div class="flex items-center gap-3">
+            <img src="1627539868logo-kpu.png"
+                 alt="Logo KPU" class="w-11 h-11 object-contain" />
+            <div>
+              <div class="font-bold text-sm sm:text-base text-slate-900">Buku Register Permintaan Informasi Publik Tahun <span id="reg-tahun-judul">2026</span></div>
+              <div class="font-bold text-xs sm:text-sm text-slate-800">KPU Kabupaten Mamasa</div>
+            </div>
+          </div>
+
+          <div class="text-center font-bold text-xs sm:text-sm text-slate-800">
+            <div>Permintaan Informasi Publik melalui PPID</div>
+            <div>KPU Kabupaten Mamasa</div>
+          </div>
+
+          <div class="text-left md:text-right text-[10px] sm:text-xs font-semibold text-slate-700 leading-tight">
+            <div>berdasarkan PKPU 22/2023 tentang Pengelolaan dan Pelayanan</div>
+            <div>Informasi Publik di Komisi Pemilihan Umum, Komisi Pemilihan</div>
+            <div>Provinsi, dan Komisi Pemilihan Umum Kabupaten/Kota</div>
+          </div>
+        </div>
+
+        <!-- Tabel Multi-Header Sesuai Gambar 1 -->
+        <table class="w-full border-collapse border border-black text-[10px] leading-tight">
+          <colgroup>
+            <col style="width: 2.0%;" />  <!-- No -->
+            <col style="width: 6.2%;" />  <!-- No. Register -->
+            <col style="width: 4.8%;" />  <!-- Tgl Permohonan -->
+            <col style="width: 5.5%;" />  <!-- Pemohon -->
+            <col style="width: 5.0%;" />  <!-- Alamat -->
+            <col style="width: 5.5%;" />  <!-- Nomor Kontak -->
+            <col style="width: 4.2%;" />  <!-- Pekerjaan -->
+            <col style="width: 7.5%;" />  <!-- Informasi Yang Diminta -->
+            <col style="width: 5.5%;" />  <!-- Tujuan Penggunaan -->
+            <col style="width: 4.3%;" />  <!-- Status Permohonan -->
+            <col style="width: 2.1%;" />  <!-- Ya -->
+            <col style="width: 2.3%;" />  <!-- Tidak -->
+            <col style="width: 4.4%;" />  <!-- Belum Didokumentasikan -->
+            <col style="width: 2.9%;" />  <!-- Softcopy -->
+            <col style="width: 2.9%;" />  <!-- Hardcopy -->
+            <col style="width: 3.6%;" />  <!-- Melihat/Mengetahui -->
+            <col style="width: 3.3%;" />  <!-- Meminta Salinan -->
+            <col style="width: 4.8%;" />  <!-- Keputusan -->
+            <col style="width: 4.2%;" />  <!-- Alasan Penolakan -->
+            <col style="width: 4.6%;" />  <!-- Pemberitahuan Tertulis -->
+            <col style="width: 4.6%;" />  <!-- Pemberian Informasi -->
+            <col style="width: 2.6%;" />  <!-- Biaya -->
+            <col style="width: 2.6%;" />  <!-- Cara -->
+            <col style="width: 4.2%;" />  <!-- Link Form -->
+            <col style="width: 4.4%;" />  <!-- Petugas -->
+          </colgroup>
+          <thead>
+            <tr class="bg-slate-100 text-center font-bold">
+              <th rowspan="3" class="border border-black p-1.5">No</th>
+              <th rowspan="3" class="border border-black p-1.5">No. Register</th>
+              <th rowspan="3" class="border border-black p-1.5">Tgl Permohonan</th>
+              <th rowspan="3" class="border border-black p-1.5">Pemohon<br/>(Nama/Instansi)</th>
+              <th rowspan="3" class="border border-black p-1.5">Alamat</th>
+              <th rowspan="3" class="border border-black p-1.5">Nomor Kontak</th>
+              <th rowspan="3" class="border border-black p-1.5">Pekerjaan</th>
+              <th rowspan="3" class="border border-black p-1.5 min-w-[140px]">Informasi Yang Diminta</th>
+              <th rowspan="3" class="border border-black p-1.5">Tujuan Penggunaan Informasi</th>
+              <th rowspan="3" class="border border-black p-1.5">Status Permohonan</th>
+              <th colspan="3" class="border border-black p-1">Status Informasi</th>
+              <th colspan="2" class="border border-black p-1">Bentuk Informasi yang Dikuasai</th>
+              <th colspan="2" class="border border-black p-1">Jenis Permohonan</th>
+              <th rowspan="3" class="border border-black p-1.5">Keputusan</th>
+              <th rowspan="3" class="border border-black p-1.5">Alasan Penolakan</th>
+              <th colspan="2" class="border border-black p-1">Hari dan Tanggal</th>
+              <th colspan="2" class="border border-black p-1">Biaya dan Cara Pembayaran</th>
+              <th rowspan="3" class="border border-black p-1.5">Link Form Permohonan/ Penyerahan</th>
+              <th rowspan="3" class="border border-black p-1.5">Petugas</th>
+              <th rowspan="3" class="no-print border border-black p-1.5 bg-amber-50">Aksi / Edit</th>
+            </tr>
+            <tr class="bg-slate-100 text-center font-bold">
+              <th colspan="2" class="border border-black p-1">Dibawah Penguasaan</th>
+              <th rowspan="2" class="border border-black p-1">Belum Didokumentasikan</th>
+              <th rowspan="2" class="border border-black p-1">Softcopy</th>
+              <th rowspan="2" class="border border-black p-1">Hardcopy</th>
+              <th rowspan="2" class="border border-black p-1">Melihat/ Mengetahui</th>
+              <th rowspan="2" class="border border-black p-1">Meminta Salinan</th>
+              <th rowspan="2" class="border border-black p-1">Pemberitahuan Tertulis</th>
+              <th rowspan="2" class="border border-black p-1">Pemberian Informasi</th>
+              <th rowspan="2" class="border border-black p-1">Biaya</th>
+              <th rowspan="2" class="border border-black p-1">Cara</th>
+            </tr>
+            <tr class="bg-slate-100 text-center font-bold">
+              <th class="border border-black p-1">Ya</th>
+              <th class="border border-black p-1">Tidak</th>
+            </tr>
+          </thead>
+          <tbody id="buku-register-tbody">
+            <!-- Diisi otomatis via JavaScript -->
+          </tbody>
+        </table>
+
+        <!-- Tanda Tangan Pengesahan Buku Register (Muncul Rapi saat Cetak F4 Landscape) -->
+        <div class="hidden print:flex ttd-register justify-end mt-6 pr-10 text-xs text-black">
+          <div class="text-center">
+            <div>Mamasa, <span id="reg-tgl-cetak"></span></div>
+            <div class="font-bold">Pejabat Pengelola Informasi dan Dokumentasi (PPID)</div>
+            <div class="font-bold">KPU Kabupaten Mamasa</div>
+            <div class="h-14"></div>
+            <div class="font-bold underline">( ...................................................... )</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         TAB 4: PANEL ADMIN & KONFIGURASI APPS SCRIPT
+    ====================================================================== -->
+    <section id="tab-admin-panel" class="tab-section hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Panel Kontrol Administrator PPID</h2>
+            <p class="text-xs text-slate-500">Kelola koneksi Google Apps Script, penomoran register otomatis, dan kredensial Admin.</p>
+          </div>
+          <button onclick="logoutAdmin()" class="px-4 py-2 rounded-xl bg-red-100 text-red-800 hover:bg-red-200 text-xs font-bold">
+            Keluar Mode Admin
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Koneksi Google Apps Script -->
+          <div class="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="database" class="w-4 h-4 text-red-700"></i> Koneksi Backend Google Apps Script
+            </h3>
+            <p class="text-xs text-slate-600">Tempelkan URL Web App dari Google Apps Script Anda untuk menyinkronkan database Google Sheets secara *real-time*.</p>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">URL Web App Google Apps Script</label>
+              <input type="url" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+            </div>
+            <div class="flex gap-2">
+              <button onclick="saveGasUrl()" class="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-xl text-xs font-semibold">
+                Simpan & Hubungkan Database
+              </button>
+              <button onclick="syncFromBackend()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold">
+                Muat Ulang Data
+              </button>
+            </div>
+          </div>
+
+          <!-- Pengaturan Format Nomor & Instansi -->
+          <div class="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4 text-red-700"></i> Pengaturan Format & Akun Admin
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Format No. Reg Permohonan</label>
+                <input type="text" id="cfg-fmt-prm" value="000/PPID-KPU.MMS/2026" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Format No. Reg Keberatan</label>
+                <input type="text" id="cfg-fmt-keb" value="000/KEB-PPID.MMS/2026" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Petugas Default</label>
+                <input type="text" id="cfg-petugas" value="Petugas PPID Mamasa" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Tahun Buku Register</label>
+                <input type="text" id="cfg-tahun" value="2026" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Username Admin</label>
+                <input type="text" id="cfg-admin-user" value="admin" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Password Admin</label>
+                <input type="text" id="cfg-admin-pass" value="ppidmamasa2026" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white" />
+              </div>
+            </div>
+            <button onclick="saveAdminSettings()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-semibold">
+              Simpan Perubahan Pengaturan
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL LOGIN ADMIN -->
+  <div id="modal-login" class="no-print hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-lg text-slate-900">Login Administrator</h3>
+        <button onclick="closeModal('modal-login')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <p class="text-xs text-slate-500">Masuk sebagai Admin untuk mengedit status Buku Register, mengubah nomor register, dan mengatur database.</p>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Username</label>
+          <input type="text" id="login-user" placeholder="admin" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="login-pass" placeholder="••••••••" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div class="text-[11px] text-slate-400 bg-slate-50 p-2 rounded-lg">
+          Default: User <b>admin</b> | Pass <b>ppidmamasa2026</b>
+        </div>
+        <button onclick="submitLogin()" class="w-full bg-red-800 hover:bg-red-900 text-white font-bold py-2.5 rounded-xl text-sm">
+          Masuk Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT LENGKAP BUKU REGISTER (KHUSUS ADMIN) -->
+  <div id="modal-edit-register" class="no-print hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 my-8">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="font-bold text-lg text-slate-900">Edit Lengkap Entri Buku Register (Mode Admin)</h3>
+        <button onclick="closeModal('modal-edit-register')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="form-admin-register" onsubmit="handleSaveAdminRegister(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <input type="hidden" id="adm-reg-id" />
+        <div>
+          <label class="font-semibold block mb-1">No. Register</label>
+          <input type="text" id="adm-reg-no" required class="w-full border rounded-lg px-2.5 py-2 font-bold" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Tgl Permohonan</label>
+          <input type="date" id="adm-reg-tgl" required class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Nama Pemohon</label>
+          <input type="text" id="adm-reg-nama" required class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">NIK / No. Akta Pendirian</label>
+          <input type="text" id="adm-reg-nik" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Alamat</label>
+          <input type="text" id="adm-reg-alamat" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Nomor Kontak</label>
+          <input type="text" id="adm-reg-kontak" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Pekerjaan</label>
+          <input type="text" id="adm-reg-pekerjaan" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="font-semibold block mb-1">Informasi Yang Diminta</label>
+          <input type="text" id="adm-reg-rincian" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Tujuan Penggunaan</label>
+          <input type="text" id="adm-reg-tujuan" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Status Permohonan</label>
+          <select id="adm-reg-status" class="w-full border rounded-lg px-2.5 py-2">
+            <option value="Selesai">Selesai</option>
+            <option value="Diproses">Diproses</option>
+            <option value="Ditolak">Ditolak</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Dibawah Penguasaan?</label>
+          <select id="adm-reg-kuasa" class="w-full border rounded-lg px-2.5 py-2">
+            <option value="Ya">Ya</option>
+            <option value="Tidak">Tidak</option>
+            <option value="Belum">Belum Didokumentasikan</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Bentuk Informasi</label>
+          <select id="adm-reg-bentuk" class="w-full border rounded-lg px-2.5 py-2">
+            <option value="Softcopy">Softcopy</option>
+            <option value="Hardcopy">Hardcopy</option>
+            <option value="Keduanya">Softcopy & Hardcopy</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Jenis Permohonan</label>
+          <select id="adm-reg-jenis" class="w-full border rounded-lg px-2.5 py-2">
+            <option value="Meminta Salinan">Meminta Salinan</option>
+            <option value="Melihat/Mengetahui">Melihat/Mengetahui</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Keputusan</label>
+          <select id="adm-reg-keputusan" class="w-full border rounded-lg px-2.5 py-2">
+            <option value="Diberikan Sepenuhnya">Diberikan Sepenuhnya</option>
+            <option value="Diberikan Sebagian">Diberikan Sebagian</option>
+            <option value="Ditolak">Ditolak</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Alasan Penolakan (Jika Ditolak)</label>
+          <input type="text" id="adm-reg-tolak" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Tgl Pemberitahuan Tertulis</label>
+          <input type="date" id="adm-reg-tgl-beritahu" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Tgl Pemberian Informasi</label>
+          <input type="date" id="adm-reg-tgl-beri" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Biaya & Cara Pembayaran</label>
+          <input type="text" id="adm-reg-biaya" placeholder="Rp 0 / Gratis" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Cara Bayar</label>
+          <input type="text" id="adm-reg-carabayar" placeholder="- / Tunai" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Petugas</label>
+          <input type="text" id="adm-reg-petugas" class="w-full border rounded-lg px-2.5 py-2" />
+        </div>
+        <div class="sm:col-span-3 flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModal('modal-edit-register')" class="px-4 py-2 rounded-xl border text-slate-600">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-red-800 text-white font-bold">Simpan Perubahan Register</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       LOGIKA APLIKASI & SINKRONISASI DATA
+  ========================================================================== -->
+  <script>
+    // STATE APLIKASI
+    let appState = {
+      isAdmin: localStorage.getItem('ppid_is_admin') === 'true',
+      gasUrl: localStorage.getItem('ppid_gas_url') || '',
+      config: JSON.parse(localStorage.getItem('ppid_config') || JSON.stringify({
+        admin_user: 'admin',
+        admin_pass: 'ppidmamasa2026',
+        format_reg_permohonan: '000/PPID-KPU.MMS/2026',
+        format_reg_keberatan: '000/KEB-PPID.MMS/2026',
+        petugas_default: 'Petugas Layanan PPID',
+        tahun_anggaran: '2026'
+      })),
+      permohonan: JSON.parse(localStorage.getItem('ppid_permohonan') || '[]'),
+      keberatan: JSON.parse(localStorage.getItem('ppid_keberatan') || '[]')
+    };
+
+    // INISIALISASI SAAT HALAMAN DIMUAT
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      updateAdminUI();
+      populateSettingsInputs();
+      resetFormPermohonan();
+      resetFormKeberatan();
+      refreshAllViews();
+
+      if (appState.gasUrl) {
+        syncFromBackend();
+      }
+    });
+
+    // =========================================================================
+    // NAVIGASI TAB & NOTIFIKASI
+    // =========================================================================
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById('tab-' + tabName);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('bg-white/20', 'text-white');
+          btn.classList.remove('text-red-100');
+        } else {
+          btn.classList.remove('bg-white/20', 'text-white');
+          btn.classList.add('text-red-100');
+        }
+      });
+
+      if (tabName === 'form-keberatan') {
+        populatePermohonanDropdown();
+      }
+      if (tabName === 'buku-register') {
+        renderBukuRegister();
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bg = type === 'error' ? 'bg-red-700' : (type === 'info' ? 'bg-slate-800' : 'bg-emerald-700');
+      toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2 transition-all duration-300`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    // =========================================================================
+    // GENERATOR NOMOR REGISTER BERURUTAN OTOMATIS
+    // =========================================================================
+    function getNextPermohonanNumber() {
+      let maxNum = 0;
+      appState.permohonan.forEach(item => {
+        const match = String(item.No_Register || '').match(/^(\d+)/);
+        if (match) {
+          const n = parseInt(match[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      });
+      const next = String(maxNum + 1).padStart(3, '0');
+      const fmt = appState.config.format_reg_permohonan || '000/PPID-KPU.MMS/2026';
+      return fmt.replace(/^\d+/, next);
+    }
+
+    function getNextKeberatanNumber() {
+      let maxNum = 0;
+      appState.keberatan.forEach(item => {
+        const match = String(item.No_Register_Keberatan || '').match(/^(\d+)/);
+        if (match) {
+          const n = parseInt(match[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      });
+      const next = String(maxNum + 1).padStart(3, '0');
+      const fmt = appState.config.format_reg_keberatan || '000/KEB-PPID.MMS/2026';
+      return fmt.replace(/^\d+/, next);
+    }
+
+    function formatTanggalIndo(dateStr) {
+      if (!dateStr) return '';
+      const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    // =========================================================================
+    // 1. FORMULIR PERMOHONAN & TANDA TERIMA (TERHUBUNG OTOMATIS)
+    // =========================================================================
+    function resetFormPermohonan() {
+      document.getElementById('form-permohonan').reset();
+      document.getElementById('prm-id').value = '';
+      const nextReg = getNextPermohonanNumber();
+      const noregInput = document.getElementById('prm-noreg');
+      noregInput.value = nextReg;
+      noregInput.readOnly = !appState.isAdmin;
+
+      const badgeEdit = document.getElementById('badge-edit-reg-prm');
+      if (appState.isAdmin) badgeEdit.classList.remove('hidden');
+      else badgeEdit.classList.add('hidden');
+
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('prm-tgl').value = today;
+      document.getElementById('prm-petugas').value = appState.config.petugas_default || 'Petugas Layanan PPID';
+      syncPreviewPermohonan();
+    }
+
+    function syncPreviewPermohonan() {
+      const noreg = document.getElementById('prm-noreg').value;
+      const tgl = formatTanggalIndo(document.getElementById('prm-tgl').value);
+      const nama = document.getElementById('prm-nama').value;
+      const nik = document.getElementById('prm-nik').value;
+      const alamat = document.getElementById('prm-alamat').value;
+      const pekerjaan = document.getElementById('prm-pekerjaan').value;
+      const kontak = document.getElementById('prm-kontak').value;
+      const rincian = document.getElementById('prm-rincian').value;
+      const kategori = document.getElementById('prm-kategori').value;
+      const tujuan = document.getElementById('prm-tujuan').value;
+      const caraPeroleh = document.getElementById('prm-cara-peroleh').value;
+      const caraSalinan = document.getElementById('prm-cara-salinan').value;
+      const petugas = document.getElementById('prm-petugas').value;
+
+      // Sinkron ke Halaman 1: Formulir Permohonan
+      document.getElementById('prev-prm-noreg').textContent = noreg;
+      document.getElementById('prev-prm-nama').textContent = nama;
+      document.getElementById('prev-prm-nik').textContent = nik;
+      document.getElementById('prev-prm-alamat').textContent = alamat;
+      document.getElementById('prev-prm-pekerjaan').textContent = pekerjaan;
+      document.getElementById('prev-prm-kontak').textContent = kontak;
+      document.getElementById('prev-prm-rincian').textContent = rincian;
+      document.getElementById('prev-prm-tujuan').textContent = tujuan;
+      document.getElementById('prev-prm-tgl').textContent = tgl;
+      document.getElementById('prev-prm-ttd-pemohon').textContent = nama;
+      document.getElementById('prev-prm-ttd-petugas').textContent = petugas;
+
+      document.getElementById('check-kat-1').classList.toggle('hidden', kategori !== '1');
+      document.getElementById('check-kat-2').classList.toggle('hidden', kategori !== '2');
+
+      const spanHard = document.getElementById('span-hardcopy');
+      const spanSoft = document.getElementById('span-softcopy');
+      spanHard.classList.remove('line-through', 'font-bold');
+      spanSoft.classList.remove('line-through', 'font-bold');
+      if (caraPeroleh === '2-softcopy') {
+        spanHard.classList.add('line-through');
+        spanSoft.classList.add('font-bold');
+      } else if (caraPeroleh === '2-hardcopy') {
+        spanSoft.classList.add('line-through');
+        spanHard.classList.add('font-bold');
+      }
+
+      document.getElementById('check-sal-1').classList.toggle('hidden', caraSalinan !== '1');
+      document.getElementById('check-sal-2').classList.toggle('hidden', caraSalinan !== '2');
+      document.getElementById('check-sal-3').classList.toggle('hidden', caraSalinan !== '3');
+
+      // Sinkron Otomatis ke Halaman 2: Tanda Terima
+      document.getElementById('tt-nama').textContent = nama;
+      document.getElementById('tt-noreg').textContent = noreg;
+      document.getElementById('tt-tgl').textContent = tgl;
+      document.getElementById('tt-tgl-kanan').textContent = tgl;
+      document.getElementById('tt-sign-pemohon').textContent = nama;
+      document.getElementById('tt-sign-petugas').textContent = petugas;
+    }
+
+    function handleSavePermohonan(e) {
+      e.preventDefault();
+      const id = document.getElementById('prm-id').value;
+      const caraPeroleh = document.getElementById('prm-cara-peroleh').value;
+      const bentukInfo = caraPeroleh === '2-hardcopy' ? 'Hardcopy' : 'Softcopy';
+      const jenisPrm = caraPeroleh === '1' ? 'Melihat/Mengetahui' : 'Meminta Salinan';
+
+      const record = {
+        ID: id || 'PRM-' + Date.now(),
+        No_Register: document.getElementById('prm-noreg').value.trim(),
+        Tgl_Permohonan: document.getElementById('prm-tgl').value,
+        Nama_Pemohon: document.getElementById('prm-nama').value.trim(),
+        NIK_Akta: document.getElementById('prm-nik').value.trim(),
+        Alamat: document.getElementById('prm-alamat').value.trim(),
+        No_Kontak: document.getElementById('prm-kontak').value.trim(),
+        Pekerjaan: document.getElementById('prm-pekerjaan').value.trim(),
+        Rincian_Informasi: document.getElementById('prm-rincian').value.trim(),
+        Kategori_Informasi: document.getElementById('prm-kategori').value,
+        Tujuan_Penggunaan: document.getElementById('prm-tujuan').value.trim(),
+        Cara_Memperoleh: caraPeroleh,
+        Cara_Salinan: document.getElementById('prm-cara-salinan').value,
+        Status_Permohonan: 'Diproses',
+        Dikuasai_Ya_Tidak: 'Ya',
+        Belum_Didokumentasikan: '-',
+        Bentuk_Informasi: bentukInfo,
+        Jenis_Permohonan: jenisPrm,
+        Keputusan: 'Diberikan Sepenuhnya',
+        Alasan_Penolakan: '-',
+        Tgl_Pemberitahuan: document.getElementById('prm-tgl').value,
+        Tgl_Pemberian: document.getElementById('prm-tgl').value,
+        Biaya: 'Rp 0',
+        Cara_Bayar: 'Gratis',
+        Nama_Petugas: document.getElementById('prm-petugas').value.trim()
+      };
+
+      const existingIdx = appState.permohonan.findIndex(x => x.ID === record.ID);
+      if (existingIdx >= 0) {
+        appState.permohonan[existingIdx] = { ...appState.permohonan[existingIdx], ...record };
+        showToast('Permohonan berhasil diperbarui & tersinkron ke Buku Register!');
+      } else {
+        appState.permohonan.push(record);
+        showToast(`Permohonan ${record.No_Register} tersimpan & otomatis masuk Buku Register!`);
+      }
+
+      saveLocalState();
+      refreshAllViews();
+
+      if (appState.gasUrl) {
+        postToBackend({ action: 'SAVE_PERMOHONAN', data: record });
+      }
+    }
+
+    // =========================================================================
+    // 2. FORMULIR KEBERATAN ATAS PELAYANAN INFORMASI
+    // =========================================================================
+    function populatePermohonanDropdown() {
+      const sel = document.getElementById('keb-ref-select');
+      sel.innerHTML = '<option value="">-- Pilih Nomor Register Permohonan --</option>';
+      appState.permohonan.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.ID;
+        opt.textContent = `${p.No_Register} - ${p.Nama_Pemohon}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function autofillKeberatanFromPermohonan() {
+      const selectedId = document.getElementById('keb-ref-select').value;
+      const p = appState.permohonan.find(item => item.ID === selectedId);
+      if (!p) return;
+
+      document.getElementById('keb-nopermohonan').value = p.No_Register;
+      document.getElementById('keb-tujuan').value = p.Tujuan_Penggunaan;
+      document.getElementById('keb-nama').value = p.Nama_Pemohon;
+      document.getElementById('keb-alamat').value = p.Alamat;
+      syncPreviewKeberatan();
+    }
+
+    function resetFormKeberatan() {
+      document.getElementById('form-keberatan').reset();
+      document.getElementById('keb-id').value = '';
+      const nextKeb = getNextKeberatanNumber();
+      const noregInput = document.getElementById('keb-noreg');
+      noregInput.value = nextKeb;
+      noregInput.readOnly = !appState.isAdmin;
+
+      document.getElementById('keb-nosurat').value = nextKeb;
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('keb-tgl-pengajuan').value = today;
+      document.getElementById('keb-petugas').value = appState.config.petugas_default || 'Petugas Layanan PPID';
+      populatePermohonanDropdown();
+      syncPreviewKeberatan();
+    }
+
+    function syncPreviewKeberatan() {
+      document.getElementById('prev-keb-nosurat').textContent = document.getElementById('keb-nosurat').value;
+      document.getElementById('prev-keb-noreg').textContent = document.getElementById('keb-noreg').value;
+      document.getElementById('prev-keb-nopermohonan').textContent = document.getElementById('keb-nopermohonan').value;
+      document.getElementById('prev-keb-tujuan').textContent = document.getElementById('keb-tujuan').value;
+      const nama = document.getElementById('keb-nama').value;
+      document.getElementById('prev-keb-nama').textContent = nama;
+      document.getElementById('prev-keb-instansi').textContent = document.getElementById('keb-instansi').value;
+      document.getElementById('prev-keb-alamat').textContent = document.getElementById('keb-alamat').value;
+      document.getElementById('prev-keb-alasan').textContent = document.getElementById('keb-alasan').value;
+      document.getElementById('prev-keb-kasus').textContent = document.getElementById('keb-kasus').value;
+      document.getElementById('prev-keb-tanggapan').textContent = document.getElementById('keb-tgl-tanggapan').value;
+      document.getElementById('prev-keb-tgl').textContent = formatTanggalIndo(document.getElementById('keb-tgl-pengajuan').value);
+      const petugas = document.getElementById('keb-petugas').value;
+      document.getElementById('prev-keb-ttd-petugas').textContent = petugas;
+      document.getElementById('prev-keb-ttd-pemohon').textContent = nama;
+    }
+
+    function handleSaveKeberatan(e) {
+      e.preventDefault();
+      const id = document.getElementById('keb-id').value;
+      const record = {
+        ID: id || 'KEB-' + Date.now(),
+        Nomor_Surat: document.getElementById('keb-nosurat').value.trim(),
+        No_Register_Keberatan: document.getElementById('keb-noreg').value.trim(),
+        No_Permohonan_Ref: document.getElementById('keb-nopermohonan').value.trim(),
+        Tujuan_Penggunaan: document.getElementById('keb-tujuan').value.trim(),
+        Nama_Pemohon: document.getElementById('keb-nama').value.trim(),
+        Instansi: document.getElementById('keb-instansi').value.trim(),
+        Alamat: document.getElementById('keb-alamat').value.trim(),
+        Alasan_Keberatan: document.getElementById('keb-alasan').value.trim(),
+        Kasus_Posisi: document.getElementById('keb-kasus').value.trim(),
+        Tgl_Tanggapan_Diberikan: document.getElementById('keb-tgl-tanggapan').value.trim(),
+        Tgl_Pengajuan: document.getElementById('keb-tgl-pengajuan').value,
+        Nama_Petugas: document.getElementById('keb-petugas').value.trim()
+      };
+
+      const idx = appState.keberatan.findIndex(x => x.ID === record.ID);
+      if (idx >= 0) {
+        appState.keberatan[idx] = record;
+        showToast('Formulir keberatan berhasil diperbarui!');
+      } else {
+        appState.keberatan.push(record);
+        showToast(`Pengajuan Keberatan ${record.No_Register_Keberatan} berhasil dicatat!`);
+      }
+
+      saveLocalState();
+      refreshAllViews();
+
+      if (appState.gasUrl) {
+        postToBackend({ action: 'SAVE_KEBERATAN', data: record });
+      }
+    }
+
+    // =========================================================================
+    // 3. BUKU REGISTER & RENDER TABEL
+    // =========================================================================
+    function populateYearFilterOptions() {
+      const select = document.getElementById('filter-tahun-register');
+      if (!select) return;
+
+      const currentSelected = select.value;
+      const defaultYear = String(appState.config.tahun_anggaran || '2026');
+      const yearsSet = new Set([defaultYear, '2024', '2025', '2026', '2027']);
+
+      // Ambil tahun dari seluruh data permohonan yang tercatat
+      appState.permohonan.forEach(item => {
+        if (item.Tgl_Permohonan) {
+          const y = String(item.Tgl_Permohonan).slice(0, 4);
+          if (/^\d{4}$/.test(y)) yearsSet.add(y);
+        }
+        const regMatch = String(item.No_Register || '').match(/(\d{4})$/);
+        if (regMatch) yearsSet.add(regMatch[1]);
+      });
+
+      const sortedYears = Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
+      let html = `<option value="ALL">Semua Tahun</option>`;
+      sortedYears.forEach(y => {
+        html += `<option value="${y}">${y}</option>`;
+      });
+      select.innerHTML = html;
+
+      if (currentSelected && (currentSelected === 'ALL' || yearsSet.has(currentSelected))) {
+        select.value = currentSelected;
+      } else {
+        select.value = defaultYear;
+      }
+    }
+
+    function refreshAllViews() {
+      document.getElementById('stat-total-permohonan').textContent = appState.permohonan.length;
+      document.getElementById('stat-next-reg').textContent = getNextPermohonanNumber();
+      document.getElementById('stat-total-keberatan').textContent = appState.keberatan.length;
+      document.getElementById('reg-tahun-judul').textContent = appState.config.tahun_anggaran || '2026';
+
+      populateYearFilterOptions();
+      renderRecentTable();
+      renderBukuRegister();
+      renderKeberatanTable();
+    }
+
+    function renderRecentTable() {
+      const tbody = document.getElementById('recent-table-body');
+      if (appState.permohonan.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Belum ada data permohonan tercatat.</td></tr>`;
+        return;
+      }
+      const recent = [...appState.permohonan].reverse().slice(0, 5);
+      tbody.innerHTML = recent.map(item => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-3.5 font-bold text-red-900">${item.No_Register}</td>
+          <td class="px-6 py-3.5 text-slate-600">${formatTanggalIndo(item.Tgl_Permohonan)}</td>
+          <td class="px-6 py-3.5 font-medium text-slate-900">${item.Nama_Pemohon}</td>
+          <td class="px-6 py-3.5 text-slate-600 max-w-xs truncate">${item.Rincian_Informasi}</td>
+          <td class="px-6 py-3.5 text-right">
+            <button onclick="loadPermohonanToForm('${item.ID}')" class="text-xs bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg font-semibold">
+              Buka & Cetak PDF
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderBukuRegister() {
+      const tbody = document.getElementById('buku-register-tbody');
+      const keyword = (document.getElementById('search-register').value || '').toLowerCase();
+      const selectedYear = document.getElementById('filter-tahun-register')?.value || String(appState.config.tahun_anggaran || '2026');
+
+      // Otomatis perbarui tahun pada judul kop Buku Register sesuai pilihan
+      const judulTahunEl = document.getElementById('reg-tahun-judul');
+      if (judulTahunEl) {
+        judulTahunEl.textContent = selectedYear === 'ALL' ? 'Semua Tahun' : selectedYear;
+      }
+
+      const filtered = appState.permohonan.filter(item => {
+        const itemYearFromDate = item.Tgl_Permohonan ? String(item.Tgl_Permohonan).slice(0, 4) : '';
+        const itemYearFromReg = (String(item.No_Register || '').match(/(\d{4})$/) || [])[1] || '';
+        const itemYear = itemYearFromDate || itemYearFromReg;
+
+        const matchYear = selectedYear === 'ALL' || itemYear === selectedYear;
+        const matchKeyword =
+          String(item.No_Register).toLowerCase().includes(keyword) ||
+          String(item.Nama_Pemohon).toLowerCase().includes(keyword) ||
+          String(item.Rincian_Informasi).toLowerCase().includes(keyword);
+
+        return matchYear && matchKeyword;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="26" class="border border-black p-6 text-center text-slate-500">Belum ada data pada Buku Register Permintaan Informasi Publik${selectedYear !== 'ALL' ? ' untuk Tahun ' + selectedYear : ''}.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((item, idx) => {
+        const kuasaYa = item.Dikuasai_Ya_Tidak === 'Ya' ? '✓' : '';
+        const kuasaTidak = item.Dikuasai_Ya_Tidak === 'Tidak' ? '✓' : '';
+        const belumDok = item.Dikuasai_Ya_Tidak === 'Belum' ? '✓' : '';
+        const isSoft = String(item.Bentuk_Informasi).includes('Softcopy') || item.Bentuk_Informasi === 'Keduanya' ? '✓' : '';
+        const isHard = String(item.Bentuk_Informasi).includes('Hardcopy') || item.Bentuk_Informasi === 'Keduanya' ? '✓' : '';
+        const isMelihat = item.Jenis_Permohonan === 'Melihat/Mengetahui' ? '✓' : '';
+        const isSalinan = item.Jenis_Permohonan === 'Meminta Salinan' ? '✓' : '';
+
+        return `
+          <tr class="hover:bg-amber-50/40">
+            <td class="border border-black p-1.5 text-center">${idx + 1}</td>
+            <td class="border border-black p-1.5 font-bold whitespace-nowrap">${item.No_Register}</td>
+            <td class="border border-black p-1.5 whitespace-nowrap">${formatTanggalIndo(item.Tgl_Permohonan)}</td>
+            <td class="border border-black p-1.5 font-semibold">${item.Nama_Pemohon}</td>
+            <td class="border border-black p-1.5">${item.Alamat}</td>
+            <td class="border border-black p-1.5">${item.No_Kontak}</td>
+            <td class="border border-black p-1.5">${item.Pekerjaan}</td>
+            <td class="border border-black p-1.5">${item.Rincian_Informasi}</td>
+            <td class="border border-black p-1.5">${item.Tujuan_Penggunaan}</td>
+            <td class="border border-black p-1.5 text-center font-semibold">${item.Status_Permohonan || 'Diproses'}</td>
+            <td class="border border-black p-1.5 text-center font-bold">${kuasaYa}</td>
+            <td class="border border-black p-1.5 text-center font-bold">${kuasaTidak}</td>
+            <td class="border border-black p-1.5 text-center font-bold">${belumDok}</td>
+            <td class="border border-black p-1.5 text-center font-bold">${isSoft}</td>
+            <td class="border border-black p-1.5 text-center font-bold">${isHard}</td>
+            <td class="border border-black p-1.5 text-center font-bold">${isMelihat}</td>
+            <td class="border border-black p-1.5 text-center font-bold">${isSalinan}</td>
+            <td class="border border-black p-1.5">${item.Keputusan || '-'}</td>
+            <td class="border border-black p-1.5">${item.Alasan_Penolakan || '-'}</td>
+            <td class="border border-black p-1.5 whitespace-nowrap">${formatTanggalIndo(item.Tgl_Pemberitahuan)}</td>
+            <td class="border border-black p-1.5 whitespace-nowrap">${formatTanggalIndo(item.Tgl_Pemberian)}</td>
+            <td class="border border-black p-1.5">${item.Biaya || 'Rp 0'}</td>
+            <td class="border border-black p-1.5">${item.Cara_Bayar || '-'}</td>
+            <td class="border border-black p-1.5 text-center">
+              <button onclick="loadPermohonanToForm('${item.ID}')" class="text-blue-700 underline font-semibold">Lihat Form</button>
+            </td>
+            <td class="border border-black p-1.5">${item.Nama_Petugas || '-'}</td>
+            <td class="no-print border border-black p-1.5 text-center whitespace-nowrap bg-amber-50/50">
+              ${appState.isAdmin ? `
+                <button onclick="openAdminEditRegister('${item.ID}')" class="bg-amber-600 text-white px-2 py-1 rounded text-[10px] font-bold mr-1">Edit</button>
+                <button onclick="deletePermohonan('${item.ID}')" class="bg-red-700 text-white px-2 py-1 rounded text-[10px] font-bold">Hapus</button>
+              ` : `<span class="text-slate-400 italic text-[10px]">Login Admin</span>`}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderKeberatanTable() {
+      const tbody = document.getElementById('keberatan-table-body');
+      if (appState.keberatan.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-slate-400">Belum ada data pengajuan keberatan.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = appState.keberatan.map(k => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 font-bold text-amber-900">${k.No_Register_Keberatan}</td>
+          <td class="px-4 py-3 text-slate-600">${k.No_Permohonan_Ref}</td>
+          <td class="px-4 py-3 font-medium text-slate-900">${k.Nama_Pemohon}</td>
+          <td class="px-4 py-3 text-slate-600 max-w-xs truncate">${k.Alasan_Keberatan}</td>
+          <td class="px-4 py-3 text-right space-x-1">
+            <button onclick="loadKeberatanToForm('${k.ID}')" class="bg-slate-800 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">Buka / Print</button>
+            ${appState.isAdmin ? `<button onclick="deleteKeberatan('${k.ID}')" class="bg-red-700 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">Hapus</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // =========================================================================
+    // MUAT DATA KE FORM UNTUK DICETAK ATAU DIEDIT
+    // =========================================================================
+    function loadPermohonanToForm(id) {
+      const p = appState.permohonan.find(x => x.ID === id);
+      if (!p) return;
+
+      switchTab('form-permohonan');
+      document.getElementById('prm-id').value = p.ID;
+      document.getElementById('prm-noreg').value = p.No_Register;
+      document.getElementById('prm-noreg').readOnly = !appState.isAdmin;
+      document.getElementById('prm-tgl').value = p.Tgl_Permohonan;
+      document.getElementById('prm-nama').value = p.Nama_Pemohon;
+      document.getElementById('prm-nik').value = p.NIK_Akta || '';
+      document.getElementById('prm-alamat').value = p.Alamat;
+      document.getElementById('prm-pekerjaan').value = p.Pekerjaan;
+      document.getElementById('prm-kontak').value = p.No_Kontak;
+      document.getElementById('prm-rincian').value = p.Rincian_Informasi;
+      document.getElementById('prm-kategori').value = p.Kategori_Informasi || '1';
+      document.getElementById('prm-tujuan').value = p.Tujuan_Penggunaan;
+      document.getElementById('prm-cara-peroleh').value = p.Cara_Memperoleh || '2-softcopy';
+      document.getElementById('prm-cara-salinan').value = p.Cara_Salinan || '3';
+      document.getElementById('prm-petugas').value = p.Nama_Petugas;
+
+      syncPreviewPermohonan();
+      showToast(`Dokumen ${p.No_Register} dimuat. Siap dicetak atau diedit.`);
+    }
+
+    function loadKeberatanToForm(id) {
+      const k = appState.keberatan.find(x => x.ID === id);
+      if (!k) return;
+
+      switchTab('form-keberatan');
+      document.getElementById('keb-id').value = k.ID;
+      document.getElementById('keb-noreg').value = k.No_Register_Keberatan;
+      document.getElementById('keb-noreg').readOnly = !appState.isAdmin;
+      document.getElementById('keb-nosurat').value = k.Nomor_Surat;
+      document.getElementById('keb-nopermohonan').value = k.No_Permohonan_Ref;
+      document.getElementById('keb-tujuan').value = k.Tujuan_Penggunaan;
+      document.getElementById('keb-nama').value = k.Nama_Pemohon;
+      document.getElementById('keb-instansi').value = k.Instansi;
+      document.getElementById('keb-alamat').value = k.Alamat;
+      document.getElementById('keb-alasan').value = k.Alasan_Keberatan;
+      document.getElementById('keb-kasus').value = k.Kasus_Posisi;
+      document.getElementById('keb-tgl-pengajuan').value = k.Tgl_Pengajuan;
+      document.getElementById('keb-tgl-tanggapan').value = k.Tgl_Tanggapan_Diberikan;
+      document.getElementById('keb-petugas').value = k.Nama_Petugas;
+
+      syncPreviewKeberatan();
+      showToast(`Formulir Keberatan ${k.No_Register_Keberatan} siap dicetak.`);
+    }
+
+    // =========================================================================
+    // ADMIN EDIT LENGKAP BUKU REGISTER & HAPUS DATA
+    // =========================================================================
+    function openAdminEditRegister(id) {
+      if (!appState.isAdmin) return;
+      const p = appState.permohonan.find(x => x.ID === id);
+      if (!p) return;
+
+      document.getElementById('adm-reg-id').value = p.ID;
+      document.getElementById('adm-reg-no').value = p.No_Register;
+      document.getElementById('adm-reg-tgl').value = p.Tgl_Permohonan;
+      document.getElementById('adm-reg-nama').value = p.Nama_Pemohon;
+      document.getElementById('adm-reg-nik').value = p.NIK_Akta || '';
+      document.getElementById('adm-reg-alamat').value = p.Alamat;
+      document.getElementById('adm-reg-kontak').value = p.No_Kontak;
+      document.getElementById('adm-reg-pekerjaan').value = p.Pekerjaan;
+      document.getElementById('adm-reg-rincian').value = p.Rincian_Informasi;
+      document.getElementById('adm-reg-tujuan').value = p.Tujuan_Penggunaan;
+      document.getElementById('adm-reg-status').value = p.Status_Permohonan || 'Diproses';
+      document.getElementById('adm-reg-kuasa').value = p.Dikuasai_Ya_Tidak || 'Ya';
+      document.getElementById('adm-reg-bentuk').value = p.Bentuk_Informasi || 'Softcopy';
+      document.getElementById('adm-reg-jenis').value = p.Jenis_Permohonan || 'Meminta Salinan';
+      document.getElementById('adm-reg-keputusan').value = p.Keputusan || 'Diberikan Sepenuhnya';
+      document.getElementById('adm-reg-tolak').value = p.Alasan_Penolakan || '-';
+      document.getElementById('adm-reg-tgl-beritahu').value = p.Tgl_Pemberitahuan || '';
+      document.getElementById('adm-reg-tgl-beri').value = p.Tgl_Pemberian || '';
+      document.getElementById('adm-reg-biaya').value = p.Biaya || 'Rp 0';
+      document.getElementById('adm-reg-carabayar').value = p.Cara_Bayar || 'Gratis';
+      document.getElementById('adm-reg-petugas').value = p.Nama_Petugas || '';
+
+      document.getElementById('modal-edit-register').classList.remove('hidden');
+    }
+
+    function handleSaveAdminRegister(e) {
+      e.preventDefault();
+      const id = document.getElementById('adm-reg-id').value;
+      const idx = appState.permohonan.findIndex(x => x.ID === id);
+      if (idx < 0) return;
+
+      const updated = {
+        ...appState.permohonan[idx],
+        No_Register: document.getElementById('adm-reg-no').value.trim(),
+        Tgl_Permohonan: document.getElementById('adm-reg-tgl').value,
+        Nama_Pemohon: document.getElementById('adm-reg-nama').value.trim(),
+        NIK_Akta: document.getElementById('adm-reg-nik').value.trim(),
+        Alamat: document.getElementById('adm-reg-alamat').value.trim(),
+        No_Kontak: document.getElementById('adm-reg-kontak').value.trim(),
+        Pekerjaan: document.getElementById('adm-reg-pekerjaan').value.trim(),
+        Rincian_Informasi: document.getElementById('adm-reg-rincian').value.trim(),
+        Tujuan_Penggunaan: document.getElementById('adm-reg-tujuan').value.trim(),
+        Status_Permohonan: document.getElementById('adm-reg-status').value,
+        Dikuasai_Ya_Tidak: document.getElementById('adm-reg-kuasa').value,
+        Bentuk_Informasi: document.getElementById('adm-reg-bentuk').value,
+        Jenis_Permohonan: document.getElementById('adm-reg-jenis').value,
+        Keputusan: document.getElementById('adm-reg-keputusan').value,
+        Alasan_Penolakan: document.getElementById('adm-reg-tolak').value,
+        Tgl_Pemberitahuan: document.getElementById('adm-reg-tgl-beritahu').value,
+        Tgl_Pemberian: document.getElementById('adm-reg-tgl-beri').value,
+        Biaya: document.getElementById('adm-reg-biaya').value,
+        Cara_Bayar: document.getElementById('adm-reg-carabayar').value,
+        Nama_Petugas: document.getElementById('adm-reg-petugas').value
+      };
+
+      appState.permohonan[idx] = updated;
+      saveLocalState();
+      refreshAllViews();
+      closeModal('modal-edit-register');
+      showToast('Data Buku Register berhasil diperbarui oleh Admin!');
+
+      if (appState.gasUrl) {
+        postToBackend({ action: 'SAVE_PERMOHONAN', data: updated });
+      }
+    }
+
+    function deletePermohonan(id) {
+      if (!appState.isAdmin) return;
+      appState.permohonan = appState.permohonan.filter(x => x.ID !== id);
+      saveLocalState();
+      refreshAllViews();
+      showToast('Entri register berhasil dihapus.', 'info');
+      if (appState.gasUrl) {
+        postToBackend({ action: 'DELETE_RECORD', sheet: 'Permohonan_Register', id: id });
+      }
+    }
+
+    function deleteKeberatan(id) {
+      if (!appState.isAdmin) return;
+      appState.keberatan = appState.keberatan.filter(x => x.ID !== id);
+      saveLocalState();
+      refreshAllViews();
+      showToast('Data keberatan berhasil dihapus.', 'info');
+      if (appState.gasUrl) {
+        postToBackend({ action: 'DELETE_RECORD', sheet: 'Keberatan', id: id });
+      }
+    }
+
+    // =========================================================================
+    // CETAK / SIMPAN PDF DOKUMEN
+    // =========================================================================
+    function printDocument(mode) {
+      const allAreas = ['print-area-permohonan', 'print-area-keberatan', 'print-area-register'];
+      allAreas.forEach(id => document.getElementById(id).classList.add('no-print'));
+
+      if (mode === 'permohonan-combined') {
+        document.getElementById('print-area-permohonan').classList.remove('no-print');
+      } else if (mode === 'keberatan') {
+        document.getElementById('print-area-keberatan').classList.remove('no-print');
+      }
+
+      window.print();
+
+      setTimeout(() => {
+        allAreas.forEach(id => document.getElementById(id).classList.remove('no-print'));
+      }, 500);
+    }
+
+    function printRegisterLandscape() {
+      const regTglCetak = document.getElementById('reg-tgl-cetak');
+      if (regTglCetak) {
+        regTglCetak.textContent = formatTanggalIndo(new Date().toISOString().split('T')[0]);
+      }
+
+      const style = document.createElement('style');
+      style.id = 'temp-landscape-style';
+      // Ukuran kertas F4 (Folio) dalam orientasi Landscape: 330mm x 215mm
+      style.innerHTML = `
+        @media print {
+          @page {
+            size: 330mm 215mm landscape !important;
+            margin: 4mm !important;
+          }
+          html, body {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+          }
+          #print-area-register {
+            width: 100% !important;
+            max-width: 100% !important;
+            zoom: 1 !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const allAreas = ['print-area-permohonan', 'print-area-keberatan'];
+      allAreas.forEach(id => document.getElementById(id).classList.add('no-print'));
+
+      window.print();
+
+      setTimeout(() => {
+        allAreas.forEach(id => document.getElementById(id).classList.remove('no-print'));
+        const s = document.getElementById('temp-landscape-style');
+        if (s) s.remove();
+      }, 500);
+    }
+
+    // =========================================================================
+    // AKUN ADMIN & SINKRONISASI GOOGLE APPS SCRIPT
+    // =========================================================================
+    function openLoginModal() {
+      if (appState.isAdmin) {
+        switchTab('admin-panel');
+        return;
+      }
+      document.getElementById('modal-login').classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function submitLogin() {
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value.trim();
+
+      if (u === appState.config.admin_user && p === appState.config.admin_pass) {
+        appState.isAdmin = true;
+        localStorage.setItem('ppid_is_admin', 'true');
+        updateAdminUI();
+        closeModal('modal-login');
+        resetFormPermohonan();
+        resetFormKeberatan();
+        refreshAllViews();
+        showToast('Berhasil login sebagai Administrator PPID!');
+      } else {
+        showToast('Username atau Password Admin salah!', 'error');
+      }
+    }
+
+    function logoutAdmin() {
+      appState.isAdmin = false;
+      localStorage.setItem('ppid_is_admin', 'false');
+      updateAdminUI();
+      resetFormPermohonan();
+      resetFormKeberatan();
+      refreshAllViews();
+      switchTab('dashboard');
+      showToast('Anda telah keluar dari Mode Admin.', 'info');
+    }
+
+    function updateAdminUI() {
+      const btnLabel = document.getElementById('admin-btn-label');
+      const navAdmin = document.getElementById('nav-admin-settings');
+      const statRole = document.getElementById('stat-role');
+
+      if (appState.isAdmin) {
+        btnLabel.textContent = 'Panel Admin';
+        navAdmin.classList.remove('hidden');
+        statRole.textContent = 'Administrator (Full Akses)';
+        statRole.classList.add('text-emerald-700');
+      } else {
+        btnLabel.textContent = 'Login Admin';
+        navAdmin.classList.add('hidden');
+        statRole.textContent = 'Petugas / Pemohon';
+        statRole.classList.remove('text-emerald-700');
+      }
+    }
+
+    function populateSettingsInputs() {
+      document.getElementById('cfg-gas-url').value = appState.gasUrl;
+      document.getElementById('cfg-fmt-prm').value = appState.config.format_reg_permohonan;
+      document.getElementById('cfg-fmt-keb').value = appState.config.format_reg_keberatan;
+      document.getElementById('cfg-petugas').value = appState.config.petugas_default;
+      document.getElementById('cfg-tahun').value = appState.config.tahun_anggaran;
+      document.getElementById('cfg-admin-user').value = appState.config.admin_user;
+      document.getElementById('cfg-admin-pass').value = appState.config.admin_pass;
+    }
+
+    function saveGasUrl() {
+      const url = document.getElementById('cfg-gas-url').value.trim();
+      appState.gasUrl = url;
+      localStorage.setItem('ppid_gas_url', url);
+      if (url) {
+        syncFromBackend();
+      } else {
+        document.getElementById('db-dot').className = 'w-2 h-2 rounded-full bg-amber-400';
+        document.getElementById('db-status-text').textContent = 'Mode Lokal';
+      }
+    }
+
+    function saveAdminSettings() {
+      appState.config = {
+        ...appState.config,
+        format_reg_permohonan: document.getElementById('cfg-fmt-prm').value,
+        format_reg_keberatan: document.getElementById('cfg-fmt-keb').value,
+        petugas_default: document.getElementById('cfg-petugas').value,
+        tahun_anggaran: document.getElementById('cfg-tahun').value,
+        admin_user: document.getElementById('cfg-admin-user').value,
+        admin_pass: document.getElementById('cfg-admin-pass').value
+      };
+      localStorage.setItem('ppid_config', JSON.stringify(appState.config));
+      resetFormPermohonan();
+      resetFormKeberatan();
+      refreshAllViews();
+      showToast('Pengaturan sistem berhasil disimpan!');
+
+      if (appState.gasUrl) {
+        postToBackend({ action: 'SAVE_CONFIG', config: appState.config });
+      }
+    }
+
+    function saveLocalState() {
+      localStorage.setItem('ppid_permohonan', JSON.stringify(appState.permohonan));
+      localStorage.setItem('ppid_keberatan', JSON.stringify(appState.keberatan));
+    }
+
+    async function syncFromBackend() {
+      if (!appState.gasUrl) return;
+      const dot = document.getElementById('db-dot');
+      const txt = document.getElementById('db-status-text');
+      txt.textContent = 'Menyinkronkan...';
+
+      try {
+        const res = await fetch(appState.gasUrl);
+        const data = await res.json();
+        if (data.status === 'success') {
+          appState.permohonan = data.permohonan || [];
+          appState.keberatan = data.keberatan || [];
+          if (data.config) {
+            appState.config = { ...appState.config, ...data.config };
+            localStorage.setItem('ppid_config', JSON.stringify(appState.config));
+          }
+          saveLocalState();
+          populateSettingsInputs();
+          resetFormPermohonan();
+          resetFormKeberatan();
+          refreshAllViews();
+
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          txt.textContent = 'Terhubung Google Sheets';
+          showToast('Data berhasil disinkronkan dengan Google Sheets!');
+        }
+      } catch (err) {
+        dot.className = 'w-2 h-2 rounded-full bg-red-400';
+        txt.textContent = 'Gagal Konek Apps Script';
+        showToast('Gagal mengambil data dari Apps Script. Periksa izin akses Web App (Anyone).', 'error');
+      }
+    }
+
+    async function postToBackend(payload) {
+      if (!appState.gasUrl) return;
+      try {
+        showToast('Menyinkronkan ke Google Sheets...', 'info');
+        await fetch(appState.gasUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        // Beri jeda 1.5 detik agar Google Sheets selesai menulis lalu tarik ulang data terbaru
+        setTimeout(() => {
+          syncFromBackend();
+        }, 1500);
+      } catch (err) {
+        console.error('Sync error:', err);
+        showToast('Gagal mengirim data ke Google Sheets.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
